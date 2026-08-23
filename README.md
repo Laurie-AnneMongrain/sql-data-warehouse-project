@@ -29,7 +29,9 @@ Develop SQL-based analytics to deliver detailed insights into:
 These insights empower stakeholders with key business metrics, enabling strategic decision-making.
 
 License
+
 This project is licensed under the MIT license. You are free to use, modify and share this project with proper attribution. 
 
 About Me
+
 Hi there! I'm Laurie-Anne Mongrain, a third-year student at Concordia University. With over five years of experience in business, having worked with Walmart Canada and Walmart USA, I have come across many scenarios where business owners had to make important business decisions based on heavy databases. Since I was working for a SME and we were working mostly with Excel, managing the data was often a challenge. That is why I decided to learn SQL and Python to become a data analyst who can make informed decisions. 
