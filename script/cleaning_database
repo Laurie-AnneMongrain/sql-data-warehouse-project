@@ -35,6 +35,10 @@ select cst_gndr
 from bronze.crm_cust_info
 where cst_gndr != trim(cst_gndr)
 
+--Data Standardization & consistency
+select distinct cst_gndr
+from bronze.crm_cust_info
+
 select 
 cst_id,
 cst_key,
@@ -42,6 +46,10 @@ trim(cst_firstname) as cst_firstname,
 trim(cst_lastname) as cst_lastname,
 cst_marital_status,
 cst_gndr,
+case when upper(trim(cst_gndr)) = 'F' then 'Female'
+	when upper(trim(cst_gndr)) = 'M' then 'male'
+	else 'n/a'
+	end cst_gndr,
 cst_create_date
 from(
 select
