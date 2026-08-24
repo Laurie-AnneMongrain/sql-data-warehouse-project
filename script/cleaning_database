@@ -1,3 +1,7 @@
+===================================
+FOR crm_cust_info TABLE
+===================================
+
 --Check for Nulls or Duplicates in Primary Key
 --Expectation: No Result
 
@@ -72,3 +76,7 @@ FROM (
     WHERE cst_id IS NOT NULL
 ) t
 WHERE flag_last = 1;
+
+===================================
+FOR crm_prod_info TABLE
+===================================
