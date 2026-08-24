@@ -36,24 +36,24 @@ create table bronze.sales_details (
 	sls_price INT
 	);
 
-DROP TABLE IF EXISTS bronze_CUST_AZ12;
+DROP TABLE IF EXISTS bronze.CUST_AZ12;
 
-create table bronze_CUST_AZ12 (
+create table bronze.CUST_AZ12 (
 	CID VARCHAR(50),
 	BDATE date,
 	GEN VARCHAR(50)
 	);
 
-DROP TABLE IF EXISTS bronze_LOC_A101;
+DROP TABLE IF EXISTS bronze.LOC_A101;
 
-create table bronze_LOC_A101 (
+create table bronze.LOC_A101 (
 	CID VARCHAR(50),
 	CNTRY VARCHAR(50)
 	);
 
-DROP TABLE IF EXISTS bronze_PX_CAT_G1V2;
+DROP TABLE IF EXISTS bronze.PX_CAT_G1V2;
 
-create table bronze_PX_CAT_G1V2 (
+create table bronze.PX_CAT_G1V2 (
 	ID VARCHAR(50),
 	CAT VARCHAR(50),
 	SUBCAT VARCHAR(50),
