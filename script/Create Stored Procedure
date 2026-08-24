@@ -1,6 +1,8 @@
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS
 BEGIN
+  DECLARE @start_time DATETIME, @end_time DATETIME;
   BEGIN TRY
+    SET @start_time = GETDATE();
     TRUNCATE TABLE bronze.crm_cust_info;
     BULK INSERT bronze.crm_cust_info
     FROM '(Insert link to file)'
@@ -9,6 +11,8 @@ BEGIN
       FIELDTERMINATOR = ',',
       TABLOCK
       );
+     SET @END_TIME = GETDATE();
+    PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS VARCHAR) + 'seconds'
   
     TRUNCATE TABLE bronze.erp_product;
     BULK INSERT bronze.erp_product
