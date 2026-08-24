@@ -1,0 +1,61 @@
+DROP TABLE IF EXISTS bronze.crm_cust_info;
+
+CREATE TABLE bronze.crm_cust_info (
+    cst_id INT,
+    cst_key VARCHAR(50),
+    cst_firstname VARCHAR(50),
+    cst_lastname VARCHAR(50),
+    cst_material_status VARCHAR(50),
+    cst_gndr VARCHAR(50),
+    cst_create_date DATE
+);
+
+DROP TABLE IF EXISTS bronze.erp_product;
+
+CREATE TABLE bronze.erp_product (
+    prd_id INT,
+    prd_key VARCHAR(50),
+    prd_nm VARCHAR(255),
+    prd_cost NUMERIC(10,2),
+    prd_line VARCHAR(10),
+    prd_start_dt DATE,
+    prd_end_dt DATE
+);
+
+DROP TABLE IF EXISTS bronze.sales_details;
+
+create table bronze.sales_details (
+	sls_ord_num VARCHAR(50),
+	sls_prd_key VARCHAR(50),
+	sls_cust_id INT,
+	sls_order_dt DATE,
+	sls_ship_dt DATE,
+	sls_due_dt DATE,
+	sls_sales INT,
+	sls_quantity INT,
+	sls_price INT
+	);
+
+DROP TABLE IF EXISTS bronze_CUST_AZ12;
+
+create table bronze_CUST_AZ12 (
+	CID VARCHAR(50),
+	BDATE date,
+	GEN VARCHAR(50)
+	);
+
+DROP TABLE IF EXISTS bronze_LOC_A101;
+
+create table bronze_LOC_A101 (
+	CID VARCHAR(50),
+	CNTRY VARCHAR(50)
+	);
+
+DROP TABLE IF EXISTS bronze_PX_CAT_G1V2;
+
+create table bronze_PX_CAT_G1V2 (
+	ID VARCHAR(50),
+	CAT VARCHAR(50),
+	SUBCAT VARCHAR(50),
+	MAINTENANCE VARCHAR(50)
+	);
