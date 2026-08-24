@@ -1,56 +1,65 @@
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS
 BEGIN
-  TRUNCATE TABLE bronze.crm_cust_info;
-  BULK INSERT bronze.crm_cust_info
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
-
-  TRUNCATE TABLE bronze.erp_product;
-  BULK INSERT bronze.erp_product
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
-
-  TRUNCATE TABLE bronze.sales_details;
-  BULK INSERT bronze.sales_details
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
-
- TRUNCATE TABLE bronze.cust_as12;
-  BULK INSERT bronze.cust_as12
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
-
- TRUNCATE TABLE bronze.loc_a101;
-  BULK INSERT bronze.loc_a101
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
-
- TRUNCATE TABLE bronze.px_cat_g1v2;
-  BULK INSERT bronze.px_cat_g1v2
-  FROM '(Insert link to file)'
-  WITH (
-    FIRSTROW = 2
-    FIELDTERMINATOR = ',',
-    TABLOCK
-    );
+  BEGIN TRY
+    TRUNCATE TABLE bronze.crm_cust_info;
+    BULK INSERT bronze.crm_cust_info
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  
+    TRUNCATE TABLE bronze.erp_product;
+    BULK INSERT bronze.erp_product
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  
+    TRUNCATE TABLE bronze.sales_details;
+    BULK INSERT bronze.sales_details
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  
+   TRUNCATE TABLE bronze.cust_as12;
+    BULK INSERT bronze.cust_as12
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  
+   TRUNCATE TABLE bronze.loc_a101;
+    BULK INSERT bronze.loc_a101
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  
+   TRUNCATE TABLE bronze.px_cat_g1v2;
+    BULK INSERT bronze.px_cat_g1v2
+    FROM '(Insert link to file)'
+    WITH (
+      FIRSTROW = 2
+      FIELDTERMINATOR = ',',
+      TABLOCK
+      );
+  END TRY
+  BEGIN CATCH
+  PRINT'=============================='
+  PRINT'ERROR OCCURED DURING LOADING BRONZE LAYER'
+  PRINT 'ERROR MESSAGE' + ERROR_MESSAGE();
+  PRINT'=============================='
+  END CATCH
+END
 
