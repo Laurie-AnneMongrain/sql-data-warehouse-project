@@ -2,25 +2,103 @@
 Quality Checks
 =============================================================
 Script Purpose:
-  This script performs various quality checks dor data consistency, accuracy, and standardization across the 'silver' schemas. It includes checks for:
-  - Null or duplicate primary keys.
-  - Unwanted spaces in string fields.
-  - Data standardization and consistency.
-  - Invalid date ranges and orders.
-  - Data consisency between related fields.
+  This script performs various quality checks for data consistency, accuracy, 
+  and standardization across the 'silver' schema. It includes checks for:
+    - Null or duplicate primary keys.
+    - Unwanted spaces in string fields.
+    - Data standardization and consistency.
+    - Invalid date ranges and orders.
+    - Data consistency between related fields.
 
 Usage Notes: 
-  - Run these checks after data loading Silver Layer.
+  - Run these checks after loading the Silver Layer.
   - Investigate and resolve any discrepancies found during the checks.
 
 =============================================================
--- CHecking 'silver.cust_info'
+-- Checking 'silver.crm_cust_info'
 =============================================================
+
 -- Check for NULLS or Duplicates in Primary Key
 -- Expectation: No results
 SELECT
   cst_id,
-  COUNT(*)
-FROM silver.cust_info
+  COUNT(*) AS occurrences
+FROM silver.crm_cust_info
 GROUP BY cst_id
 HAVING COUNT(*) > 1 OR cst_id IS NULL;
+
+-- Check for unwanted spaces in string fields
+SELECT *
+FROM silver.crm_cust_info
+WHERE cst_firstname <> TRIM(cst_firstname)
+   OR cst_lastname <> TRIM(cst_lastname);
+
+-- Gender domain check
+SELECT DISTINCT cst_gndr
+FROM silver.crm_cust_info;
+
+=============================================================
+-- Checking 'silver.erp_product'
+=============================================================
+
+-- Duplicate product IDs
+SELECT prd_id, COUNT(*) AS occurrences
+FROM silver.erp_product
+GROUP BY prd_id
+HAVING COUNT(*) > 1 OR prd_id IS NULL;
+
+-- Product line domain check
+SELECT DISTINCT prd_line
+FROM silver.erp_product;
+
+-- Negative product costs
+SELECT *
+FROM silver.erp_product
+WHERE prd_cost < 0;
+
+=============================================================
+-- Checking 'silver.sales_details'
+=============================================================
+
+-- Duplicate order numbers
+SELECT sls_ord_num, COUNT(*) AS occurrences
+FROM silver.sales_details
+GROUP BY sls_ord_num
+HAVING COUNT(*) > 1 OR sls_ord_num IS NULL;
+
+-- Invalid or out-of-range dates
+SELECT *
+FROM silver.sales_details
+WHERE sls_order_dt < DATE '1900-01-01'
+   OR sls_order_dt > DATE '2100-01-01'
+   OR sls_ship_dt < DATE '1900-01-01'
+   OR sls_due_dt  < DATE '1900-01-01';
+
+-- Logical date order checks
+SELECT *
+FROM silver.sales_details
+WHERE sls_order_dt > sls_ship_dt
+   OR sls_order_dt > sls_due_dt;
+
+-- Sales consistency: sales = quantity * price
+SELECT *
+FROM silver.sales_details
+WHERE sls_sales != sls_quantity * sls_price;
+
+-- Negative or zero values
+SELECT *
+FROM silver.sales_details
+WHERE sls_sales <= 0
+   OR sls_quantity <= 0
+   OR sls_price <= 0;
+
+=============================================================
+-- Checking 'silver.cust_az12'
+=============================================================
+
+-- Duplicate customer IDs
+SELECT cid, COUNT(*) AS occurrences
+FROM silver.cust_az12
+GROUP BY cid
+HAVING COUNT(*) > 1 OR cid IS NULL
+
