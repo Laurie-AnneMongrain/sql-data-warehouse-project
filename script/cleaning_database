@@ -289,4 +289,46 @@ WHERE sls_sales != sls_quantity * sls_price
 --if price is zero or null, calculate it using sales and quantity.
 --if price is negative, convert it to a positive value.
 
+===================================
+FOR cust_az12 TABLE
+===================================
+
+insert into silver.cust_az12 (cid, bdate, gen)
+select
+case when cid like 'NAS%' then substring (cid, 4, length(cid)) 
+	else cid
+end as cid,
+case when bdate > now() then null
+	else bdate
+end as bdate,
+case when UPPER(trim(gen)) in ('F', 'FEMALE') then 'Female'
+	when UPPER(trim(gen)) in ('M', 'MALE') then 'Male'
+	else 'N/A'
+end as gen
+from bronze.cust_az12
+
+
+where case when cid like 'NAS%' then substring (cid, 4, length(cid)) 
+	else cid
+end not in (select distinct cst_key from silver.crm_cust_info)
+
+select * from silver.crm_cust_info;
+
+-- Identify out-of-range Dates
+
+select distinct
+bdate
+from silver.cust_az12
+where bdate < '1924-01-01' or bdate  > now()
+
+-- Data standardization & consistency
+
+select distinct 
+gen, 
+case when UPPER(trim(gen)) in ('F', 'FEMALE') then 'Female'
+	when UPPER(trim(gen)) in ('M', 'MALE') then 'Male'
+	else 'N/A'
+end as gen
+from bronze.cust_az12
+
 
