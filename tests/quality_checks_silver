@@ -1,0 +1,26 @@
+=============================================================
+Quality Checks
+=============================================================
+Script Purpose:
+  This script performs various quality checks dor data consistency, accuracy, and standardization across the 'silver' schemas. It includes checks for:
+  - Null or duplicate primary keys.
+  - Unwanted spaces in string fields.
+  - Data standardization and consistency.
+  - Invalid date ranges and orders.
+  - Data consisency between related fields.
+
+Usage Notes: 
+  - Run these checks after data loading Silver Layer.
+  - Investigate and resolve any discrepancies found during the checks.
+
+=============================================================
+-- CHecking 'silver.cust_info'
+=============================================================
+-- Check for NULLS or Duplicates in Primary Key
+-- Expectation: No results
+SELECT
+  cst_id,
+  COUNT(*)
+FROM silver.cust_info
+GROUP BY cst_id
+HAVING COUNT(*) > 1 OR cst_id IS NULL;
