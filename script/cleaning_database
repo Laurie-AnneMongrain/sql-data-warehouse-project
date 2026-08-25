@@ -165,3 +165,6 @@ WHERE table_schema = 'silver'
 ALTER TABLE silver.erp_product
 ALTER COLUMN prd_line TYPE VARCHAR(20);
 
+===================================
+FOR sales_details TABLE
+===================================
