@@ -1,0 +1,238 @@
+CREATE OR REPLACE PROCEDURE silver.load_silver_layer()
+LANGUAGE SQL
+AS
+$$
+
+--------------------------------------------------------------------------------
+-- Stored Procedure: silver.load_silver_layer
+-- Purpose:
+--   1. Truncate all Silver tables (prevents duplicates)
+--   2. Reload cleaned and transformed data from Bronze
+--   3. Apply business rules:
+--        - Date cleaning
+--        - Gender normalization
+--        - Country cleaning
+--        - Product key normalization
+--        - Sales / Quantity / Price corrections
+--   4. Add DWH metadata timestamps
+--------------------------------------------------------------------------------
+
+
+-----------------------------------------
+-- CRM CUSTOMER INFO
+-----------------------------------------
+TRUNCATE TABLE silver.crm_cust_info;
+
+INSERT INTO silver.crm_cust_info (
+    cst_id,
+    cst_key,
+    cst_firstname,
+    cst_lastname,
+    cst_material_status,
+    cst_gndr,
+    cst_create_date,
+    dwh_create_date
+)
+SELECT
+    cst_id,
+    cst_key,
+    cst_firstname,
+    cst_lastname,
+    cst_material_status,
+
+    -- Normalize gender
+    CASE
+        WHEN UPPER(TRIM(cst_gndr)) IN ('F', 'FEMALE') THEN 'Female'
+        WHEN UPPER(TRIM(cst_gndr)) IN ('M', 'MALE') THEN 'Male'
+        ELSE 'Unknown'
+    END AS cst_gndr,
+
+    cst_create_date,
+    CURRENT_TIMESTAMP
+FROM bronze.crm_cust_info;
+
+
+
+-----------------------------------------
+-- ERP PRODUCT
+-----------------------------------------
+TRUNCATE TABLE silver.erp_product;
+
+INSERT INTO silver.erp_product (
+    prd_id,
+    prd_key,
+    prd_nm,
+    prd_cost,
+    prd_line,
+    prd_start_dt,
+    prd_end_dt,
+    dwh_create_date
+)
+SELECT
+    prd_id,
+
+    -- Normalize product key
+    SUBSTRING(prd_key, 7, LENGTH(prd_key)) AS prd_key,
+
+    prd_nm,
+    COALESCE(prd_cost, 0),
+
+    -- Normalize product line
+    CASE 
+        WHEN UPPER(TRIM(prd_line)) = 'M' THEN 'Mountain'
+        WHEN UPPER(TRIM(prd_line)) = 'R' THEN 'Road'
+        WHEN UPPER(TRIM(prd_line)) = 'S' THEN 'Other Sales'
+        WHEN UPPER(TRIM(prd_line)) = 'T' THEN 'Touring'
+        ELSE 'N/A'
+    END AS prd_line,
+
+    prd_start_dt,
+    prd_end_dt,
+    CURRENT_TIMESTAMP
+FROM bronze.erp_product;
+
+
+
+-----------------------------------------
+-- SALES DETAILS
+-----------------------------------------
+TRUNCATE TABLE silver.sales_details;
+
+INSERT INTO silver.sales_details (
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+    sls_order_dt,
+    sls_ship_dt,
+    sls_due_dt,
+    sls_sales,
+    sls_quantity,
+    sls_price,
+    dwh_create_date
+)
+SELECT
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+
+    -- Clean order date
+    CASE
+        WHEN sls_order_dt::text IN ('', '0', '00000000') THEN NULL
+        ELSE sls_order_dt
+    END AS sls_order_dt,
+
+    -- Clean ship date
+    CASE
+        WHEN sls_ship_dt::text IN ('', '0', '00000000') THEN NULL
+        ELSE sls_ship_dt
+    END AS sls_ship_dt,
+
+    -- Clean due date
+    CASE
+        WHEN sls_due_dt::text IN ('', '0', '00000000') THEN NULL
+        ELSE sls_due_dt
+    END AS sls_due_dt,
+
+    -- Correct sales
+    CASE 
+        WHEN sls_sales IS NULL 
+          OR sls_sales <= 0 
+          OR sls_sales != sls_quantity * ABS(sls_price)
+        THEN sls_quantity * ABS(sls_price)
+        ELSE sls_sales
+    END AS sls_sales,
+
+    sls_quantity,
+
+    -- Correct price
+    CASE 
+        WHEN sls_price IS NULL 
+          OR sls_price <= 0
+        THEN sls_sales / NULLIF(sls_quantity, 0)
+        ELSE sls_price
+    END AS sls_price,
+
+    CURRENT_TIMESTAMP
+FROM bronze.sales_details;
+
+
+
+-----------------------------------------
+-- CUSTOMER AZ12
+-----------------------------------------
+TRUNCATE TABLE silver.cust_az12;
+
+INSERT INTO silver.cust_az12 (
+    cid,
+    bdate,
+    gen,
+    dwh_create_date
+)
+SELECT
+    cid,
+
+    -- Clean birthdate
+    CASE
+        WHEN bdate::text IN ('', '0', '00000000') THEN NULL
+        ELSE bdate
+    END AS bdate,
+
+    -- Normalize gender
+    CASE
+        WHEN UPPER(TRIM(gen)) IN ('F', 'FEMALE') THEN 'Female'
+        WHEN UPPER(TRIM(gen)) IN ('M', 'MALE') THEN 'Male'
+        ELSE 'Unknown'
+    END AS gen,
+
+    CURRENT_TIMESTAMP
+FROM bronze.cust_az12;
+
+
+
+-----------------------------------------
+-- LOCATION A101
+-----------------------------------------
+TRUNCATE TABLE silver.loc_a101;
+
+INSERT INTO silver.loc_a101 (
+    cid,
+    cntry,
+    dwh_create_date
+)
+SELECT
+    cid,
+    CASE
+        WHEN cntry IS NULL OR cntry = '' THEN 'Unknown'
+        ELSE cntry
+    END AS cntry,
+    CURRENT_TIMESTAMP
+FROM bronze.loc_a101;
+
+
+
+-----------------------------------------
+-- PX CATEGORY G1V2
+-----------------------------------------
+TRUNCATE TABLE silver.px_cat_g1v2;
+
+INSERT INTO silver.px_cat_g1v2 (
+    id,
+    cat,
+    subcat,
+    maintenance,
+    dwh_create_date
+)
+SELECT
+    id,
+    cat,
+    subcat,
+    maintenance,
+    CURRENT_TIMESTAMP
+FROM bronze.px_cat_g1v2;
+
+
+--------------------------------------------------------------------------------
+-- END OF PROCEDURE
+--------------------------------------------------------------------------------
+
+$$;
